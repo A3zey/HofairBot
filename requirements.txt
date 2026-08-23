@@ -2,3 +2,5 @@ python-telegram-bot>=21.0
 pillow>=10.0
 arabic-reshaper>=3.0
 python-bidi>=0.4
+requests>=2.31
+yfinance>=0.2.40
