@@ -17,7 +17,11 @@ import time
 from dataclasses import dataclass, field
 from typing import List
 
-from config import DATA_SOURCE_MODE
+import requests
+
+from config import DATA_SOURCE_MODE, TWELVE_DATA_API_KEY
+
+TWELVE_DATA_BASE_URL = "https://api.twelvedata.com"
 
 # ============ نموذج بيانات موحّد ============
 
@@ -74,22 +78,63 @@ class MockDataSource:
 
 class RealDataSource:
     """
-    هيكل جاهز للربط بـ API حقيقي. عبّي التنفيذ حسب مزوّد البيانات اللي تختاره.
+    يجيب بيانات أسعار حقيقية من Twelve Data (twelvedata.com).
+    يحتاج مفتاح API مجاني تسجّله بحسابك على موقعهم، وتحطه بمتغير بيئة
+    اسمه TWELVE_DATA_API_KEY.
     """
 
     def __init__(self, symbols):
+        if not TWELVE_DATA_API_KEY:
+            raise ValueError(
+                "مفتاح TWELVE_DATA_API_KEY غير موجود. سجّل حساب مجاني على "
+                "twelvedata.com واحصل على مفتاح، وحطه بمتغيرات البيئة."
+            )
         self.symbols = symbols
-        # TODO: هيّئ اتصال API هنا (session, api_key, إلخ)
-        raise NotImplementedError(
-            "لازم تربط RealDataSource بمزوّد بيانات حقيقي قبل استخدام الوضع real. "
-            "شوف الأمثلة في تعليقات أعلى الملف."
+        self._history_cache = {sym: self._fetch_history(sym) for sym in symbols}
+
+    def _fetch_history(self, symbol: str, outputsize: int = 60) -> List[Candle]:
+        resp = requests.get(
+            f"{TWELVE_DATA_BASE_URL}/time_series",
+            params={
+                "symbol": symbol,
+                "interval": "1min",
+                "outputsize": outputsize,
+                "apikey": TWELVE_DATA_API_KEY,
+            },
+            timeout=15,
         )
+        data = resp.json()
+        if "values" not in data:
+            raise RuntimeError(
+                f"خطأ من مزوّد البيانات لرمز {symbol}: {data.get('message', data)}"
+            )
+        # يرجع الأحدث أولًا، نعكسه عشان يصير الأقدم أولًا (ترتيب زمني صحيح)
+        raw_values = list(reversed(data["values"]))
+        candles = []
+        for v in raw_values:
+            candles.append(Candle(timestamp=time.time(), close=float(v["close"])))
+        return candles
 
     def get_price(self, symbol: str) -> float:
-        raise NotImplementedError
+        resp = requests.get(
+            f"{TWELVE_DATA_BASE_URL}/price",
+            params={"symbol": symbol, "apikey": TWELVE_DATA_API_KEY},
+            timeout=15,
+        )
+        data = resp.json()
+        if "price" not in data:
+            raise RuntimeError(
+                f"خطأ من مزوّد البيانات لرمز {symbol}: {data.get('message', data)}"
+            )
+        price = float(data["price"])
+
+        hist = self._history_cache.setdefault(symbol, [])
+        hist.append(Candle(timestamp=time.time(), close=price))
+        self._history_cache[symbol] = hist[-200:]
+        return price
 
     def get_history(self, symbol: str) -> List[Candle]:
-        raise NotImplementedError
+        return self._history_cache.get(symbol, [])
 
 
 def build_data_source(symbols):
