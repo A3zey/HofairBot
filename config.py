@@ -37,7 +37,7 @@ PRICE_CHECK_INTERVAL_SECONDS = 60
 # ============ التصميم ============
 FONT_REGULAR_PATH = "fonts/NotoNaskhArabic-Regular.ttf"
 FONT_BOLD_PATH = "fonts/NotoNaskhArabic-Bold.ttf"
-BRAND_NAME = "اسم البوت هنا"
+BRAND_NAME = "الحفير للتداول"
 
 # ============ التنويه الإلزامي (لا تحذفه) ============
 DISCLAIMER_AR = (
