@@ -81,6 +81,13 @@ async def check_and_open_position(bot: Bot, tracker, symbol, stock_price, histor
         if stock_signal is None:
             continue
 
+        if stock_signal.momentum_score < config.OPTIONS_MIN_MOMENTUM_SCORE:
+            print(
+                f"[i] {symbol}: إشارة {direction} ضعيفة (زخم {stock_signal.momentum_score}"
+                f"/100 أقل من الحد الأدنى {config.OPTIONS_MIN_MOMENTUM_SCORE}) - تم تجاهلها"
+            )
+            continue
+
         try:
             option_rec = pick_option_contract(
                 symbol=symbol,
