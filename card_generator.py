@@ -13,7 +13,7 @@
 
 from PIL import Image, ImageDraw, ImageFont
 
-from config import FONT_REGULAR_PATH, FONT_BOLD_PATH, BRAND_NAME, DISCLAIMER_AR
+from config import FONT_REGULAR_PATH, FONT_BOLD_PATH, BRAND_NAME, DISCLAIMER_AR, PROFIT_TAKE_NOTE_AR
 
 try:
     import arabic_reshaper
@@ -229,7 +229,15 @@ def render_option_entry_card(rec, out_path: str):
         right=WIDTH - margin, top=y, max_width=WIDTH - 2 * margin, line_height=38,
     )
     disclaimer_lines = max(1, _count_wrapped_lines(draw, disclaimer_text, small_font, WIDTH - 2 * margin))
-    y += disclaimer_lines * 38 + 50  # هامش أخير أسفل البطاقة
+    y += disclaimer_lines * 38 + 30
+
+    # نصيحة القناعة بالربح - بلون ذهبي يميّزها عن التنويه القانوني
+    _wrap_rtl_paragraph(
+        draw, PROFIT_TAKE_NOTE_AR, small_font, ACCENT_GOLD,
+        right=WIDTH - margin, top=y, max_width=WIDTH - 2 * margin, line_height=38,
+    )
+    note_lines = max(1, _count_wrapped_lines(draw, PROFIT_TAKE_NOTE_AR, small_font, WIDTH - 2 * margin))
+    y += note_lines * 38 + 50  # هامش أخير أسفل البطاقة
 
     # نقص الصورة على الارتفاع الفعلي المستخدم بدل المساحة المؤقتة الكبيرة
     final_img = img.crop((0, 0, WIDTH, min(y, WORK_HEIGHT)))
