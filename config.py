@@ -66,7 +66,7 @@ OPTIONS_TARGET_PCTS = [0.30, 0.60, 1.00]  # أهداف: +30%، +60%، +100%
 # ============ التصميم ============
 FONT_REGULAR_PATH = "fonts/NotoNaskhArabic-Regular.ttf"
 FONT_BOLD_PATH = "fonts/NotoNaskhArabic-Bold.ttf"
-BRAND_NAME = "اسم البوت هنا"
+BRAND_NAME = "ALHOFAIR TRADING"
 
 # ============ التنويه الإلزامي (لا تحذفه) ============
 DISCLAIMER_AR = (
