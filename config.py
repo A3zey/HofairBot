@@ -58,6 +58,10 @@ OPTIONS_EXPIRATION_MODE = "weekly"  # يختار أقرب تاريخ انتها�
 OPTIONS_ENTRY_PREMIUM_MIN = 1.05
 OPTIONS_ENTRY_PREMIUM_MAX = 1.50
 
+# أقل عدد أيام مسموح بين اليوم وتاريخ انتهاء العقد. بقيمة 1 يستبعد عقود
+# "نفس اليوم" (0DTE) الخطرة جدًا. بقيمة 2 يستبعد أيضًا عقود الغد وهكذا.
+OPTIONS_MIN_DAYS_TO_EXPIRATION = 1
+
 # الأوبشن يتحرك أسرع وأعنف بكثير من السهم نفسه، فنسب وقف الخسارة/الأهداف
 # هنا أكبر من نسب الأسهم العادية. عدّلها حسب تحملك للمخاطرة.
 OPTIONS_STOP_LOSS_PCT = 0.30          # وقف خسارة 30% من قيمة الدخول
@@ -66,7 +70,7 @@ OPTIONS_TARGET_PCTS = [0.30, 0.60, 1.00]  # أهداف: +30%، +60%، +100%
 # ============ التصميم ============
 FONT_REGULAR_PATH = "fonts/NotoNaskhArabic-Regular.ttf"
 FONT_BOLD_PATH = "fonts/NotoNaskhArabic-Bold.ttf"
-BRAND_NAME = "ALHOFAIR TRADING"
+BRAND_NAME = "اسم البوت هنا"
 
 # ============ التنويه الإلزامي (لا تحذفه) ============
 DISCLAIMER_AR = (
