@@ -55,8 +55,8 @@ STRATEGY_SETTINGS = {
 # ============ إعدادات الأوبشن (Call فقط، أقرب أسبوعي) ============
 OPTIONS_ENABLED = True
 OPTIONS_EXPIRATION_MODE = "weekly"  # يختار أقرب تاريخ انتهاء متاح فعليًا
-OPTIONS_ENTRY_PREMIUM_MIN = 1.05
-OPTIONS_ENTRY_PREMIUM_MAX = 1.50
+OPTIONS_ENTRY_PREMIUM_MIN = 1.20
+OPTIONS_ENTRY_PREMIUM_MAX = 1.80
 
 # أقل عدد أيام مسموح بين اليوم وتاريخ انتهاء العقد. رفعناها لـ 5 عشان نتجنب
 # العقود القريبة جدًا اللي يأكلها التحلل الزمني (Theta) بسرعة، ونمشي على
@@ -75,7 +75,7 @@ OPTIONS_TARGET_PCTS = [0.30, 0.60, 1.00]  # أهداف: +30%، +60%، +100%
 # ============ التصميم ============
 FONT_REGULAR_PATH = "fonts/NotoNaskhArabic-Regular.ttf"
 FONT_BOLD_PATH = "fonts/NotoNaskhArabic-Bold.ttf"
-BRAND_NAME = "اسم البوت هنا"
+BRAND_NAME = "ALHOFAIR TRADING"
 
 # ============ التنويه الإلزامي (لا تحذفه) ============
 DISCLAIMER_AR = (
