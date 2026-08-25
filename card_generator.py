@@ -165,8 +165,9 @@ def render_target_hit_card(rec, target_index: int, out_path: str):
 
 def render_option_entry_card(rec, out_path: str):
     """بطاقة توصية دخول أوبشن (Call) جديدة."""
-    height = 1400
-    img, draw = _gradient_bg(WIDTH, height)
+    # نحسب الارتفاع لاحقًا حسب المحتوى الفعلي، نبدأ بمساحة عمل مؤقتة كبيرة
+    WORK_HEIGHT = 2000
+    img, draw = _gradient_bg(WIDTH, WORK_HEIGHT)
 
     title_font = _font(FONT_BOLD_PATH, 54)
     symbol_font = _font(FONT_BOLD_PATH, 76)
@@ -204,24 +205,54 @@ def render_option_entry_card(rec, out_path: str):
 
     row("قوة الزخم", f"{rec.momentum_score}/100", ACCENT_GOLD)
 
+    # السبب: نستخدم التلفيف (wrap) لأن النص ممكن يطول ويحتاج أكثر من سطر
     y += 15
     _draw_rtl_text(draw, (WIDTH - margin, y), "السبب:", label_font, TEXT_MUTED)
     y += 48
-    _draw_rtl_text(draw, (WIDTH - margin, y), rec.reason, small_font, TEXT_WHITE)
-
-    disclaimer_y = height - 240
-    draw.line([(margin, disclaimer_y - 20), (WIDTH - margin, disclaimer_y - 20)],
-              fill=(80, 75, 95), width=2)
     _wrap_rtl_paragraph(
-        draw,
-        DISCLAIMER_AR + " تداول الأوبشن أخطر بكثير من تداول الأسهم العادية "
-        "بسبب سرعة تحرك السعر واحتمال فقدان كامل قيمة العقد.",
-        small_font, TEXT_MUTED,
-        right=WIDTH - margin, top=disclaimer_y, max_width=WIDTH - 2 * margin,
+        draw, rec.reason, small_font, TEXT_WHITE,
+        right=WIDTH - margin, top=y, max_width=WIDTH - 2 * margin, line_height=36,
     )
+    # نقدّر عدد أسطر السبب عشان نحرك المؤشر y تحتها فعليًا قبل رسم التنويه
+    reason_lines = max(1, _count_wrapped_lines(draw, rec.reason, small_font, WIDTH - 2 * margin))
+    y += reason_lines * 36 + 30
 
-    img.save(out_path)
+    # التنويه: مكانه يتبع y الفعلي بدل رقم ثابت، عشان ما يصير تداخل أبدًا
+    draw.line([(margin, y), (WIDTH - margin, y)], fill=(80, 75, 95), width=2)
+    y += 20
+    disclaimer_text = (
+        DISCLAIMER_AR + " تداول الأوبشن أخطر بكثير من تداول الأسهم العادية "
+        "بسبب سرعة تحرك السعر واحتمال فقدان كامل قيمة العقد."
+    )
+    _wrap_rtl_paragraph(
+        draw, disclaimer_text, small_font, TEXT_MUTED,
+        right=WIDTH - margin, top=y, max_width=WIDTH - 2 * margin, line_height=38,
+    )
+    disclaimer_lines = max(1, _count_wrapped_lines(draw, disclaimer_text, small_font, WIDTH - 2 * margin))
+    y += disclaimer_lines * 38 + 50  # هامش أخير أسفل البطاقة
+
+    # نقص الصورة على الارتفاع الفعلي المستخدم بدل المساحة المؤقتة الكبيرة
+    final_img = img.crop((0, 0, WIDTH, min(y, WORK_HEIGHT)))
+    final_img.save(out_path)
     return out_path
+
+
+def _count_wrapped_lines(draw, text, font, max_width):
+    """يحسب كم سطر بيحتاجه نص عربي بعد التلفيف، بدون ما يرسمه فعليًا."""
+    words = text.split(" ")
+    lines, current = [], ""
+    for w in words:
+        trial = (current + " " + w).strip()
+        bbox = draw.textbbox((0, 0), ar(trial), font=font)
+        if bbox[2] - bbox[0] <= max_width:
+            current = trial
+        else:
+            if current:
+                lines.append(current)
+            current = w
+    if current:
+        lines.append(current)
+    return len(lines)
 
 
 def render_option_target_hit_card(rec, target_index: int, out_path: str):
