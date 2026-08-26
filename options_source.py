@@ -10,9 +10,12 @@
 
 import math
 from dataclasses import dataclass
+from datetime import date, datetime
 from typing import List, Optional
 
 import yfinance as yf
+
+import config
 
 
 def _safe_float(value, default: float = 0.0) -> float:
@@ -39,12 +42,28 @@ class OptionContract:
 
 
 def get_nearest_expiration(symbol: str) -> str:
-    """يرجّع أقرب تاريخ انتهاء متاح فعليًا لهذا السهم (صيغة YYYY-MM-DD)."""
+    """
+    يرجّع أقرب تاريخ انتهاء متاح فعليًا لهذا السهم (صيغة YYYY-MM-DD)،
+    بشرط إنه يبعد عن اليوم بمقدار OPTIONS_MIN_DAYS_TO_EXPIRATION على الأقل
+    (عشان نتجنب عقود "نفس اليوم" 0DTE الخطرة جدًا إذا كان الإعداد أكبر من صفر).
+    """
     ticker = yf.Ticker(symbol)
     expirations = ticker.options
     if not expirations:
         raise RuntimeError(f"لا توجد عقود أوبشن متاحة حاليًا لـ {symbol}")
-    return expirations[0]
+
+    today = date.today()
+    min_days = config.OPTIONS_MIN_DAYS_TO_EXPIRATION
+
+    for exp_str in expirations:
+        exp_date = datetime.strptime(exp_str, "%Y-%m-%d").date()
+        days_away = (exp_date - today).days
+        if days_away >= min_days:
+            return exp_str
+
+    raise RuntimeError(
+        f"ما فيه عقود أوبشن لـ {symbol} تبعد {min_days} يوم أو أكثر عن اليوم حاليًا"
+    )
 
 
 def get_option_chain(symbol: str, expiration: str, right: str) -> List[OptionContract]:
